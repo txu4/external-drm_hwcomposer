@@ -92,6 +92,10 @@ uint32_t IAImporter::ConvertHalFormatToDrm(uint32_t hal_format) {
 
 uint32_t IAImporter::GetFormatForFrameBuffer(uint32_t fourcc_format,
                                              uint32_t plane_type) {
+
+  if (plane_type == DRM_PLANE_TYPE_CURSOR)
+    return DRM_FORMAT_ARGB8888;
+
   if (plane_type != DRM_PLANE_TYPE_PRIMARY)
     return fourcc_format;
 
@@ -204,9 +208,15 @@ int IAImporter::ImportBuffer(buffer_handle_t handle, hwc_drm_bo_t *bo) {
 
 int IAImporter::CreateFrameBuffer(hwc_drm_bo_t *bo, uint32_t plane_type) {
   uint32_t format = GetFormatForFrameBuffer(bo->format, plane_type);
-  int ret =
-      drmModeAddFB2(drm_->fd(), bo->width, bo->height, format, bo->gem_handles,
-                    bo->pitches, bo->offsets, &bo->fb_id, 0);
+  uint32_t width = bo->width;
+  uint32_t height = bo->height;
+
+  if (plane_type == DRM_PLANE_TYPE_CURSOR) {
+    width = 256;
+    height = 256;
+  }
+  int ret = drmModeAddFB2(drm_->fd(), width, height, format, bo->gem_handles,
+                          bo->pitches, bo->offsets, &bo->fb_id, 0);
 
   if (ret) {
     ALOGE("drmModeAddFB2 error (%dx%d, %c%c%c%c, handle %d pitch %d) (%s)",

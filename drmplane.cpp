@@ -165,22 +165,39 @@ int DrmPlane::UpdateProperties(drmModeAtomicReqPtr property_set,
                                       display_frame.left) < 0;
   success |= drmModeAtomicAddProperty(property_set, id_, crtc_y_property_.id(),
                                       display_frame.top) < 0;
-  success |=
-      drmModeAtomicAddProperty(property_set, id_, crtc_w_property_.id(),
-                               display_frame.right - display_frame.left) < 0;
-  success |=
-      drmModeAtomicAddProperty(property_set, id_, crtc_h_property_.id(),
-                               display_frame.bottom - display_frame.top) < 0;
+  if (type_ == DRM_PLANE_TYPE_CURSOR) {
+    success |= drmModeAtomicAddProperty(property_set, id_,
+                                        crtc_w_property_.id(), 256) < 0;
+    success |= drmModeAtomicAddProperty(property_set, id_,
+                                        crtc_h_property_.id(), 256) < 0;
+
+  } else {
+    success |=
+        drmModeAtomicAddProperty(property_set, id_, crtc_w_property_.id(),
+                                 display_frame.right - display_frame.left) < 0;
+    success |=
+        drmModeAtomicAddProperty(property_set, id_, crtc_h_property_.id(),
+                                 display_frame.bottom - display_frame.top) < 0;
+  }
+
   success |= drmModeAtomicAddProperty(property_set, id_, src_x_property_.id(),
                                       (int)(source_crop.left) << 16) < 0;
   success |= drmModeAtomicAddProperty(property_set, id_, src_y_property_.id(),
                                       (int)(source_crop.top) << 16) < 0;
-  success |= drmModeAtomicAddProperty(
-                 property_set, id_, src_w_property_.id(),
-                 (int)(source_crop.right - source_crop.left) << 16) < 0;
-  success |= drmModeAtomicAddProperty(
-                 property_set, id_, src_h_property_.id(),
-                 (int)(source_crop.bottom - source_crop.top) << 16) < 0;
+  if (type_ == DRM_PLANE_TYPE_CURSOR) {
+    success |= drmModeAtomicAddProperty(property_set, id_, src_w_property_.id(),
+                                        256 << 16) < 0;
+    success |= drmModeAtomicAddProperty(property_set, id_, src_h_property_.id(),
+                                        256 << 16) < 0;
+
+  } else {
+    success |= drmModeAtomicAddProperty(
+                   property_set, id_, src_w_property_.id(),
+                   (int)(source_crop.right - source_crop.left) << 16) < 0;
+    success |= drmModeAtomicAddProperty(
+                   property_set, id_, src_h_property_.id(),
+                   (int)(source_crop.bottom - source_crop.top) << 16) < 0;
+  }
 
   if (rotation_property_.id()) {
     success = drmModeAtomicAddProperty(property_set, id_,
