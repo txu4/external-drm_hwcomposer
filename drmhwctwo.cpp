@@ -699,7 +699,7 @@ HWC2::Error DrmHwcTwo::HwcDisplay::ValidateDisplay(uint32_t *num_types,
         ++*num_types;
         break;
       default:
-        layer.set_validated_type(layer.sf_type());
+        layer.set_validated_type(HWC2::Composition::Client);
         break;
     }
   }
