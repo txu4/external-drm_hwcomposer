@@ -99,18 +99,6 @@ uint32_t IAImporter::GetFormatForFrameBuffer(uint32_t fourcc_format,
   if (plane_type != DRM_PLANE_TYPE_PRIMARY)
     return fourcc_format;
 
-  // We only support 24 bit colordepth for primary planes on
-  // pre SKL Hardware. Ideally, we query format support from
-  // plane to determine this.
-  switch (fourcc_format) {
-    case DRM_FORMAT_ABGR8888:
-      return DRM_FORMAT_XBGR8888;
-    case DRM_FORMAT_ARGB8888:
-      return DRM_FORMAT_XRGB8888;
-    default:
-      break;
-  }
-
   return fourcc_format;
 }
 
